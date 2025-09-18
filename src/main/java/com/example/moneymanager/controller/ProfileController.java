@@ -1,6 +1,7 @@
 package com.example.moneymanager.controller;
 import com.example.moneymanager.dto.AuthDTO;
 import com.example.moneymanager.dto.ProfileDTO;
+import com.example.moneymanager.entity.ProfileEntity;
 import com.example.moneymanager.service.ProfileService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -33,18 +34,21 @@ public class ProfileController {
     @PostMapping("/login")
     public ResponseEntity<Map<String, Object>> login(@RequestBody AuthDTO authDTO) {
         try {
-            if(!profileService.isAccountActive(authDTO.getEmail())){
-                return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of
-                        ("message" ,"Account is not activate. Please activate your account first"));
+            ProfileEntity profile = profileService.findByEmailOrThrow(authDTO.getEmail());
+            if (!profile.getIsActive()) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                        .body(Map.of("message", "Account is not activated. Please activate your account first"));
             }
             Map<String,Object> response = profileService.authenticatedAndGenerateToken(authDTO);
             return ResponseEntity.ok(response);
-        }catch (Exception e){
+
+        } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of(
                     "message", e.getMessage()
             ));
         }
     }
+
 
     @GetMapping("/test")
     public String Test(){

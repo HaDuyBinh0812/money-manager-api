@@ -83,6 +83,10 @@ public class ProfileService {
                 .map(ProfileEntity::getIsActive)
                 .orElse(false);
     }
+    public ProfileEntity findByEmailOrThrow(String email) {
+        return profileRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("Invalid email or password"));
+    }
 
     public ProfileEntity getCurrentProfile() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -118,7 +122,6 @@ public class ProfileService {
                     "token", token,
                     "user", getPublicProfile(authDTO.getEmail())
             );
-
         } catch (Exception e){
             throw new RuntimeException("Invalid email or password");
         }
